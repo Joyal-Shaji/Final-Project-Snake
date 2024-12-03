@@ -30,7 +30,7 @@ class Main:
                     running = False
             pygame.display.update()
 
-
+#
 main = Main()
 #main.draw_background()
 main.run()
