@@ -2,6 +2,7 @@ import pygame
 
 from settings import *
 
+
 class Main:
     def __init__(self):
         # init pygame and the size of the window
@@ -20,10 +21,16 @@ class Main:
     def run(self):
         running = True
         while running:
+            self.display_surface.fill((0, 0, 0))
+            main.draw_background()  # draws the checkered background
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.QUIT
                     running = False
+            pygame.display.update()
+
 
 main = Main()
+#main.draw_background()
 main.run()
