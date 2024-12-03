@@ -12,8 +12,9 @@ snake = pygame.Rect((300, 250, 30, 30))
 map_width = 800
 map_height = 600
 line_width = 5
-map_edge = pygame.Rect((0, 0, 800, 600) )
+map_edge = pygame.Rect((0, 0, 800, 600))
 
+move = (0,0)
 
 run = True
 while run:
@@ -22,24 +23,30 @@ while run:
 
     pygame.draw.rect(screen,'white', map_edge, line_width)
 
-    key = pygame.key.get_pressed()
-    if key[pygame.K_a] == True:
-        snake.move_ip(-1, 0)
-    elif key[pygame.K_w] == True:
-        snake.move_ip(0, -1)
-    elif key[pygame.K_d] == True:
-        snake.move_ip(1, 0)
-    elif key[pygame.K_s] == True:
-        snake.move_ip(0, 1)
+
 
     pygame.draw.rect(screen, 'green', snake)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-        if event.type == pygame.Rect.colliderect()
 
+        if event.type == pygame.KEYDOWN:
 
+            if event.key == pygame.K_LEFT:
+                move = (-10, 0)
+            if event.key == pygame.K_RIGHT:
+                move = (10, 0)
+            if event.key == pygame.K_UP:
+                move = (0, -10)
+            if event.key == pygame.K_DOWN:
+                move = (0, 10)
+
+        """if snake.colliderect(map_edge):
+            print("colliding")
+        else:
+            print("not colloding")
+"""
     pygame.display.update()
 
 pygame.quit()
