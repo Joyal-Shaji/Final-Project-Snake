@@ -1,6 +1,7 @@
 import tkinter
 import random
 from tkinter import messagebox  # Import for the score keeper
+import pygame
 
 # Forming the grid that I first worked out on paper
 rows = 25
@@ -50,6 +51,18 @@ level = 1  # Start at level 1
 food_count = 0  # To keep track of how much food has been eaten
 speed = 100  # Initial speed (in ms)
 
+# SFX
+pygame.init()
+background_song = (pygame.mixer.music.load
+                   ("Take On Me (8 Bit Remix Cover Version) [Tribute to A-ha] - 8 Bit Universe [ ezmp3.cc ].mp3"))
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1, 0.0)
+change_direction_sfx = pygame.mixer.Sound("sound3.mp3")
+eat_sfx = pygame.mixer.Sound("zapsplat_cartoon_bite_eat_crunch_single_002_58271.mp3")
+die_sfx = pygame.mixer.Sound("zapsplat_multimedia_game_sound_8_bit_blip_descending_negative_die_112015.mp3")
+level_up_sfx = pygame.mixer.Sound("sound2.wav")
+
+
 
 def change_direction(e):  # e for event
     global velocityX, velocityY
@@ -57,15 +70,19 @@ def change_direction(e):  # e for event
         return
 
     if (e.keysym == "Up" and velocityY != 1):  # != 1 makes sure that we are not travelling downwards
+        change_direction_sfx.play()
         velocityX = 0  # 0 because we are not moving horizontally
         velocityY = -1
     elif (e.keysym == "Down" and velocityY != -1):  # != to -1 makes sure that we are not travelling up
+        change_direction_sfx.play()
         velocityX = 0
         velocityY = 1
     elif (e.keysym == "Left" and velocityX != 1):  # != to 1 makes sure that we are not travelling to the right
+        change_direction_sfx.play()
         velocityX = -1
         velocityY = 0
     elif (e.keysym == "Right" and velocityX != -1):  # != to -1 makes sure that we are not travelling to the left
+        change_direction_sfx.play()
         velocityX = 1
         velocityY = 0
 
@@ -90,6 +107,7 @@ def moveSnake():
 
     # Collision with food
     if snake.x == food.x and snake.y == food.y:
+        eat_sfx.play()  # plays the eating sfx
         score += 1  # Increment score
         food_count += 1  # Increment food count
         # Add a new block to the tail of the snake
@@ -105,6 +123,7 @@ def moveSnake():
 
         # Increase speed and level up after 6 pieces of food
         if food_count >= 5:
+            level_up_sfx.play()
             level += 1
             food_count = 0  # Reset food count after level up
             speed -= 10  # Increase speed by reducing delay (faster snake)
@@ -147,6 +166,9 @@ def draw():
 
 
 def display_game_over():
+    pygame.mixer.music.stop()
+    pygame.time.delay(100)
+    die_sfx.play()
     global score
     messagebox.showinfo("Game Over", f"Game Over!\nYour final score: {score}\nLevel: {level}")
     window.destroy()  # Close the game window

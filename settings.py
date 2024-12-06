@@ -3,7 +3,7 @@ import pygame
 # dimensions for game tiles and screen
 CELL_SIZE = 80
 ROWS = 10
-COLUMNS = 16
+COLUMNS = 18
 WINDOW_WIDTH = COLUMNS * CELL_SIZE
 WINDOW_HEIGHT = ROWS * CELL_SIZE
 
