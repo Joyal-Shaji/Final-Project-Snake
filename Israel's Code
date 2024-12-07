@@ -1,0 +1,129 @@
+# Define a new class for power-ups
+class PowerUp:
+    def __init__(self, x, y, effect_type):
+        self.x = x
+        self.y = y
+        self.effect_type = effect_type  # e.g., "slow", "score_boost", "invincible"
+
+# Initialize power-ups
+power_up = None  # Initially, no power-up is on the grid
+power_up_duration = 0  # Track duration of the current power-up effect
+active_effect = None  # Track the current active effect
+
+def spawn_power_up():
+    global power_up
+    if random.random() < 0.1:  # 10% chance of spawning a power-up after food is eaten
+        effect_type = random.choice(["slow", "score_boost", "invincible"])
+        power_up_x = random.randint(0, columns - 1) * tileSize
+        power_up_y = random.randint(0, rows - 1) * tileSize
+        power_up = PowerUp(power_up_x, power_up_y, effect_type)
+
+def apply_power_up():
+    global speed, score, power_up_duration, active_effect
+    if power_up.effect_type == "slow":
+        speed += 30  # Slow down the snake temporarily
+    elif power_up.effect_type == "score_boost":
+        score += 5  # Grant an instant score boost
+    elif power_up.effect_type == "invincible":
+        active_effect = "invincible"  # Make the snake invincible temporarily
+    power_up_duration = 50  # Set duration for the power-up effect
+
+def check_power_up_collision():
+    global power_up
+    if power_up and snake.x == power_up.x and snake.y == power_up.y:
+        apply_power_up()
+        power_up = None  # Remove the power-up after collision
+
+def update_power_up_effect():
+    global power_up_duration, active_effect, speed
+    if power_up_duration > 0:
+        power_up_duration -= 1
+    else:
+        if active_effect == "invincible":
+            active_effect = None  # Reset invincibility after duration
+        elif speed > 100:
+            speed -= 30  # Reset speed if slowed down
+        active_effect = None
+
+# Modify the moveSnake function to include power-up collision checks
+def moveSnake():
+    global snake, food, snakeBody, endGame, score, food_count, level, speed
+    if endGame:
+        return
+
+    # Collision with walls (unless invincible)
+    if not active_effect == "invincible":
+        if snake.x < 0 or snake.x >= window_size or snake.y < 0 or snake.y >= window_size:
+            endGame = True
+            display_game_over()
+            return
+
+    # Collision with itself (unless invincible)
+    if not active_effect == "invincible":
+        for segment in snakeBody:
+            if snake.x == segment.x and snake.y == segment.y:
+                endGame = True
+                display_game_over()
+                return
+
+    # Collision with food
+    if snake.x == food.x and snake.y == food.y:
+        score += 1
+        food_count += 1
+        if snakeBody:
+            last_block = snakeBody[-1]
+            snakeBody.append(block(last_block.x, last_block.y))
+        else:
+            snakeBody.append(block(snake.x, snake.y))
+        food.x = random.randint(0, columns - 1) * tileSize
+        food.y = random.randint(0, rows - 1) * tileSize
+
+        if food_count >= 5:
+            level += 1
+            food_count = 0
+            speed -= 10
+        
+        spawn_power_up()  # Attempt to spawn a power-up after food is eaten
+
+    # Check collision with power-up
+    check_power_up_collision()
+
+    # Update power-up effect duration
+    update_power_up_effect()
+
+    # Move the snake's body
+    for i in range(len(snakeBody) - 1, 0, -1):
+        snakeBody[i].x = snakeBody[i - 1].x
+        snakeBody[i].y = snakeBody[i - 1].y
+
+    if snakeBody:
+        snakeBody[0].x = snake.x
+        snakeBody[0].y = snake.y
+
+    # Move the snake's head
+    snake.x += velocityX * tileSize
+    snake.y += velocityY * tileSize
+
+# Modify the draw function to include power-ups
+def draw():
+    global snake
+    moveSnake()
+
+    canvas.delete("all")
+
+    canvas.create_text(10, 10, anchor="nw", text=f"Score: {score}", font=("Arial", 16), fill="black")
+    canvas.create_text(window_size // 2, 10, anchor="n", text=f"Level: {level}", font=("Arial", 16), fill="black")
+
+    canvas.create_rectangle(food.x, food.y, food.x + tileSize, food.y + tileSize, fill="red")
+
+    if power_up:
+        color = "blue" if power_up.effect_type == "slow" else "gold" if power_up.effect_type == "score_boost" else "purple"
+        canvas.create_rectangle(power_up.x, power_up.y, power_up.x + tileSize, power_up.y + tileSize, fill=color)
+
+    canvas.create_rectangle(snake.x, snake.y, snake.x + tileSize, snake.y + tileSize, fill="lime green")
+
+    for tile in snakeBody:
+        canvas.create_rectangle(tile.x, tile.y, tile.x + tileSize, tile.y + tileSize, fill="lime green")
+
+    if not endGame:
+        window.after(speed, draw)
