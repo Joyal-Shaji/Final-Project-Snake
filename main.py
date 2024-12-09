@@ -50,6 +50,9 @@ score = 0  # Initialize the score
 level = 1  # Start at level 1
 food_count = 0  # To keep track of how much food has been eaten
 speed = 100  # Initial speed (in ms)
+obstacle = block(20 * tileSize, 10 * tileSize)  # blocks that will kill the snake
+obstacles = []  # list of obstacle blocks
+obj_spawn_req = 5
 
 # SFX
 pygame.init()
@@ -61,7 +64,6 @@ change_direction_sfx = pygame.mixer.Sound("sound3.mp3")
 eat_sfx = pygame.mixer.Sound("zapsplat_cartoon_bite_eat_crunch_single_002_58271.mp3")
 die_sfx = pygame.mixer.Sound("zapsplat_multimedia_game_sound_8_bit_blip_descending_negative_die_112015.mp3")
 level_up_sfx = pygame.mixer.Sound("sound2.wav")
-
 
 
 def change_direction(e):  # e for event
@@ -88,7 +90,7 @@ def change_direction(e):  # e for event
 
 
 def moveSnake():
-    global snake, food, snakeBody, endGame, score, food_count, level, speed
+    global snake, food, snakeBody, endGame, score, food_count, level, speed, obstacle, obj_spawn_req
     if endGame:
         return
 
@@ -128,6 +130,17 @@ def moveSnake():
             food_count = 0  # Reset food count after level up
             speed -= 10  # Increase speed by reducing delay (faster snake)
 
+        # spawning the obstacles
+        if food_count % obj_spawn_req == 0:     # if the snake eats 5 food it will spawn and obstacle
+            spawn_obstacle()
+
+    # collision with obstacle
+    for obstacle in obstacles:
+        if snake.x == obstacle.x and snake.y == obstacle.y:
+            endGame = True
+            display_game_over()
+            return
+
     # Move the snake's body
     for i in range(len(snakeBody) - 1, 0, -1):
         snakeBody[i].x = snakeBody[i - 1].x
@@ -142,8 +155,19 @@ def moveSnake():
     snake.y += velocityY * tileSize
 
 
+def spawn_obstacle():
+    while True:
+        new_obstacle = block(random.randint(0, columns - 1) * tileSize, random.randint(0, rows - 1) * tileSize)
+
+        # Making sure that the obstacle does not overlap with the snake
+        if ((new_obstacle.x != food.x or new_obstacle.y != food.y)
+                and all(new_obstacle.x != segment.x or new_obstacle.y != segment.y for segment in snakeBody)):
+            obstacles.append(new_obstacle)
+            break
+
+
 def draw():
-    global snake
+    global snake, obstacle
     moveSnake()
 
     canvas.delete("all")  # clears the non significant squares being created on each move
@@ -157,6 +181,11 @@ def draw():
 
     # Draw the snake
     canvas.create_rectangle(snake.x, snake.y, snake.x + tileSize, snake.y + tileSize, fill="lime green")
+
+    # Draw the obstacles
+    for obstacle in obstacles:
+        canvas.create_rectangle(obstacle.x, obstacle.y, obstacle.x + tileSize, obstacle.y + tileSize, fill="#916d0a",
+                                outline="black")
 
     for tile in snakeBody:
         canvas.create_rectangle(tile.x, tile.y, tile.x + tileSize, tile.y + tileSize, fill="lime green")
