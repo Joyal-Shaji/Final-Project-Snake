@@ -51,9 +51,9 @@ score = 0  # Initialize the score
 level = 1  # Start at level 1
 food_count = 0  # To keep track of how much food has been eaten
 speed = 100  # Initial speed (in ms)
-obstacle = block(20 * tileSize, 10 * tileSize)  # blocks that will kill the snake
 obstacles = []  # list of obstacle blocks
 obj_spawn_req = 5
+
 # SFX
 pygame.init()
 background_song = (pygame.mixer.music.load
@@ -186,12 +186,13 @@ def moveSnake():
 
 
 def spawn_obstacle():
+    global obstacle
     while True:
-        new_obstacle = block(random.randint(0, columns - 1) * tileSize, random.randint(0, rows - 1) * tileSize)
+        obstacle = block(random.randint(0, columns - 1) * tileSize, random.randint(0, rows - 1) * tileSize)
         # Making sure that the obstacle does not overlap with the snake
-        if ((new_obstacle.x != food.x or new_obstacle.y != food.y)
-                and all(new_obstacle.x != segment.x or new_obstacle.y != segment.y for segment in snakeBody)):
-            obstacles.append(new_obstacle)
+        if ((obstacle.x != food.x or obstacle.y != food.y)
+                and all(obstacle.x != segment.x or obstacle.y != segment.y for segment in snakeBody)):
+            obstacles.append(obstacle)
             break
 
 
