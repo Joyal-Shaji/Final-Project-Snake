@@ -1,7 +1,7 @@
 import tkinter
 import random
 from tkinter import messagebox  # Import for the score keeper
-import pygame
+import pygame # for sounds
 
 # Forming the grid that I first worked out on paper
 rows = 25
@@ -50,7 +50,7 @@ endGame = False
 score = 0  # Initialize the score
 level = 1  # Start at level 1
 food_count = 0  # To keep track of how much food has been eaten
-speed = 100  # Initial speed (in ms)
+speed = 150  # Initial speed (in ms)
 obstacles = []  # list of obstacle blocks
 obj_spawn_req = 5
 
